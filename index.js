@@ -1,8 +1,8 @@
 'use strict';
 require('dotenv').config(); //Set environment variables from private file
-const Users = require('./services/Users');
+//const Users = require('./services/Users');
 const Collections = require('./services/Collections');
-const Tools = require('./services/Tools');
+//const Tools = require('./services/Tools');
 const MongoClient = require('mongodb');
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -26,14 +26,11 @@ app.use(bodyParser.raw({
 app.use(cors());
 
 const mongoSetup = (callback) => {
-  const password = process.env.WEB_DEV_MONGODB_PASSWORD;
+  const port = process.env.MONGODB_PORT || 27017;
+  const url = `mongodb://localhost:${port}`;
 
-  if (!password) throw new Error('Could not find password');
-
-  const uri = `mongodb://ja-manrique:${password}@duozi-web-shard-00-00-072t6.mongodb.net:27017,duozi-web-shard-00-01-072t6.mongodb.net:27017,duozi-web-shard-00-02-072t6.mongodb.net:27017/test?ssl=true&replicaSet=Duozi-web-shard-0&authSource=admin&retryWrites=true`;
-
-  //Connect to mongo cloud
-  MongoClient.connect(uri, {useNewUrlParser: true}, function (err, client) {
+  //Connect to mongo
+  MongoClient.connect(url, function (err, client) {
     if (err) throw err;
     else console.log('Successfully connected to mongoDB');
     //Afterwards instruction, client stands for a mongoClient connected to mongoAtlas instance
@@ -44,7 +41,8 @@ const mongoSetup = (callback) => {
 //Setting up endpoints
 const expressSetup = (mongoClient) => {
 
-  const db = mongoClient.db('duozi');
+  const db = mongoClient.db('collection');
+  //mongoimport --db consulta --collection consulta --type json --jsonArray --file file.json
 
   //CRUD Users
   app.get('/users', (req, res) => {
@@ -80,26 +78,20 @@ const expressSetup = (mongoClient) => {
     Collections.deleteWord(req, res, db);
   });
 
-  //Tools API
-  app.post('/tools/recognize', Tools.recognizeCharacters);  
-  app.get('/tools/hanziToPinyin', Tools.hanziToPinyin);
-  app.get('/tools/pinyinToHanzi', Tools.pinyinToHanzi);
-  app.get('/tools/librarySearch', Tools.dictionarySearch);
-
   //Serving react resources
-  app.use(express.static(path.join(__dirname, 'frontend/build')));
+  //app.use(express.static(path.join(__dirname, 'frontend/build')));
 
   //For any request that does not match any other endpoint, return app
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname+'/frontend/build/index.html'));
-  });
+  //app.get('*', (req, res) => {
+    //res.sendFile(path.join(__dirname+'/frontend/build/index.html'));
+  //});
 
   startServer();
 };
 
 //Begin listening to requests
 const startServer = () => {
-  app.listen(process.env.PORT || 8080, () => {
+  app.listen(process.env.PORT || 3001, () => {
     console.log('Server successfully run');
   });
 };
