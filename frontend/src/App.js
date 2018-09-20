@@ -52,13 +52,15 @@ class App extends Component {
       this.setState({json: JSON.parse(e.target.value), error: ''});
     }
     catch(err) {
-      this.setState({error: 'error en el json'})
+      this.setState({error: 'Error in json'})
     }
   }
 
   render() {
     return (
       <div className="App">
+        <h1>Vega embed editor</h1>
+        <p>{this.state.error}</p>
         <textarea cols="40" rows="15" onChange={(e) => this.handleChange(e)}>{JSON.stringify(this.state.json, null, 2)}</textarea>
         <div ref={(div) => this.div=div}></div>
       </div>
