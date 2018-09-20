@@ -52,8 +52,12 @@ class App extends Component {
       this.setState({json: JSON.parse(e.target.value), error: ''});
     }
     catch(err) {
-      this.setState({error: 'Error in json'})
+      this.setState({error: 'Error in json syntax'})
     }
+  }
+
+  handleUpload(e) {
+    
   }
 
   render() {
@@ -63,6 +67,11 @@ class App extends Component {
         <p>{this.state.error}</p>
         <textarea cols="40" rows="15" onChange={(e) => this.handleChange(e)}>{JSON.stringify(this.state.json, null, 2)}</textarea>
         <div ref={(div) => this.div=div}></div>
+        <div className='uploadFiles'>
+          <h2>Import csv file</h2>
+          <input type='file' onChange={this.handleUpload.bind(this)}/>
+          <button onClick={(e) => this.handleUpload(e)}>Upload csv</button>
+        </div>
       </div>
     );
   }
