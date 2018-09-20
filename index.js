@@ -28,9 +28,12 @@ app.use(cors());
 const mongoSetup = (callback) => {
   const port = process.env.MONGODB_PORT || 27017;
   const url = `mongodb://localhost:${port}`;
+  const username = process.env.MONGODB_USERNAME;
+  const password = process.env.MONGODB_PASSWORD;
+  const uri = `mongodb://${username}:${password}@cluster0-shard-00-00-keqfb.mongodb.net:27017,cluster0-shard-00-01-keqfb.mongodb.net:27017,cluster0-shard-00-02-keqfb.mongodb.net:27017/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true`;
 
   //Connect to mongo
-  MongoClient.connect(url, function (err, client) {
+  MongoClient.connect(uri, {useNewUrlParser: true}, function (err, client) {
     if (err) throw err;
     else console.log('Successfully connected to mongoDB');
     //Afterwards instruction, client stands for a mongoClient connected to mongoAtlas instance
@@ -41,57 +44,28 @@ const mongoSetup = (callback) => {
 //Setting up endpoints
 const expressSetup = (mongoClient) => {
 
-  const db = mongoClient.db('collection');
+  const db = mongoClient.db('app');
   //mongoimport --db consulta --collection consulta --type json --jsonArray --file file.json
 
   //CRUD Users
   app.get('/users', (req, res) => {
-    Users.login(req, res, db);
-  });
-
-  app.post('/users', (req, res) => {
-    Users.signup(req, res, db);
-  });
-
-  app.put('/users', (req, res) => {
-    Users.update(req, res, db);
-  });
-
-  app.delete('/users', (req, res) => {
-    Users.delete(req, res, db);
-  });
-
-  //CRUD Collections
-  app.get('/collections', (req, res) => {
-    Collections.getAllwords(req, res, db);
-  });
-
-  app.post('/collections', (req, res) => {
-    Collections.addWord(req, res, db);
-  });
-
-  app.put('/collections', (req, res) => {
-    Collections.modifyWord(req, res, db);
-  });
-
-  app.delete('/collections', (req, res) => {
-    Collections.deleteWord(req, res, db);
+    res.send('express app');
   });
 
   //Serving react resources
-  //app.use(express.static(path.join(__dirname, 'frontend/build')));
+  app.use(express.static(path.join(__dirname, 'frontend/build')));
 
   //For any request that does not match any other endpoint, return app
-  //app.get('*', (req, res) => {
-    //res.sendFile(path.join(__dirname+'/frontend/build/index.html'));
-  //});
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname+'/frontend/build/index.html'));
+  });
 
   startServer();
 };
 
 //Begin listening to requests
 const startServer = () => {
-  app.listen(process.env.PORT || 3001, () => {
+  app.listen(process.env.PORT || 8080, () => {
     console.log('Server successfully run');
   });
 };
