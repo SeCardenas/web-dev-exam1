@@ -48,8 +48,8 @@ const expressSetup = (mongoClient) => {
   //mongoimport --db consulta --collection consulta --type json --jsonArray --file file.json
 
   //CRUD Users
-  app.get('/users', (req, res) => {
-    res.send('express app');
+  app.post('/csv', (req, res) => {
+    
   });
 
   //Serving react resources
