@@ -1,34 +1,37 @@
-# Duozi
-Web application tool for early mandarin learners.
-This application allows you to store the chinese words you have learned and also provides useful tools, like pinyin search from Hanzi, or viceversa. It also includes a dictionary search allowing searching by meaning, pinyin or hanzi (characters) and a chinese text recognition (or extraction) tool from images [OCR]. 
+# App
+Web application description. 
 
-It's main purpose is to help early chinese learners in keeping track of their learned characters and to provide them tools to enhance their learning.
-
-It is made with React for the frontend and Express.js with MongoDB for the backend. The React project is located in the `./frontend` folder. The final app has been deployed to heroku: http://duozi.herokuapp.com/ for public usage.
+It is made with React for the frontend and Express.js with MongoDB for the backend. The React project is located in the `./frontend` folder. The final app has been deployed to heroku: https://web-dev-exam-1.herokuapp.com/ for public usage.
 
 ## How to run it
-To run this project, you need to have npm or yarn installed. In this case, we will detail instructions for npm:
+To run this project, you need to have npm or yarn installed. In this case, we will detail instructions for npm:  
 
- - Message Sergio Cárdenas or Julián Manrique vía Slack or email (se.cardenas@uniandes.edu.co and ja.manrique@uniandes.edu.co) in order to get .env file with API keys or raw values for environment variables. If using the .env file, place it on the root directory after cloning the repository.  
-
- - Clone the project from the github repository:  
- `git clone https://github.com/Sxubas/duozi-web.git`  
+ - Clone the project from the github repository and go to de root directory of the project:  
+ `git clone https://github.com/SeCardenas/web-dev-exam1.git`  
  `cd duozi-web`  
  
- - Install backend project dependencies and run:  
+ - Install backend project dependencies:  
  `npm install`  
+ 
+ - Edit index.js file: edit the port variable to run mongoDB locally in the port you want and change the port in which express will connect to Another option is to add a .env file, with the variables MONGODB_PORT and PORT.
+ 
+ - Then, run the index.js file:
  `node index.js`  
+ 
+ - Go to the frontend directory and edit the package.json file an edit the field "proxy"; change the port to match the port of express.
  
  - Install frontend project dependencies and run:  
  `cd ./frontend`  
- `npm install`  
+ `npm install`
  `npm start`  
+ 
+ - You can also use yarn:
+ `yarn`
+ `yarn start`
 
 Afterwards, both projects will be running. Backend API calls are bibnded to `localhost:8080` and frontend development server is binded to `localhost:3000`. Requesting `localhost:3000` through browser will run the app as it is on heroku (It proxies it's requests to `localhost:8080`).
 
 ## Authors
-[Julián Manrique](https://github.com/Sxubas)
-
 [Sergio Cárdenas](https://github.com/SeCardenas)
 
 ## Preview
