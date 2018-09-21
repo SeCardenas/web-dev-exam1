@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import './App.css';
 import vegaEmbed from 'vega-embed';
+import Papa from 'papaparse';
 
 
 class App extends Component {
@@ -21,11 +22,12 @@ class App extends Component {
         "mark": "point",
         "encoding": {
           "x": { "field": "a", "type": "ordinal" },
-          "y": { "field": "b", "type": "quantitative" },
-          "tooltip": { "field": "b", "type": "quantitative" }
+          "y": { "field": "b", "type": "quantitative" }
         }
       },
-      error: ''
+      error: '',
+      data: undefined,
+      jsoncsv: undefined
     };
   }
 
@@ -39,17 +41,31 @@ class App extends Component {
   }
 
   componentDidUpdate() {
+    console.log("actualiza");
+    console.log(this.state);
     const embed_opt = {"mode": "vega-lite"};
-    vegaEmbed(this.div, this.state.json, embed_opt)
-          .catch(error => console.log(error))
-          .then((res) =>  {
-            if(res) res.view.run();
-          });
+    if(this.state.data) {
+      vegaEmbed(this.div, this.state.jsoncsv, embed_opt)
+        .catch(error => console.log(error))
+        .then((res) =>  {
+          if(res) res.view.insert("myData", this.state.data).run();
+        });
+    }
+    else {
+      vegaEmbed(this.div, this.state.json, embed_opt)
+        .catch(error => console.log(error))
+        .then((res) =>  {
+          if(res) res.view.run();
+        });
+    }
   }
 
   handleChange(e) {
     try {
-      this.setState({json: JSON.parse(e.target.value), error: ''});
+      const json = JSON.parse(e.target.value);
+      const jsoncsv = JSON.parse(e.target.value);
+      jsoncsv.data = {"name": "myData"};
+      this.setState({json: json, jsoncsv: jsoncsv, error: ''});
     }
     catch(err) {
       this.setState({error: 'Error in json syntax'})
@@ -57,7 +73,21 @@ class App extends Component {
   }
 
   handleUpload(e) {
-    
+    const file = e.target.files[0];
+    const jsoncsv = JSON.parse(JSON.stringify(this.state.json));
+    jsoncsv.data = {"name": "myData"};
+    Papa.parse(file, {
+      header: true,
+      complete: (results, file) => {
+        this.setState({jsoncsv: jsoncsv, data: results.data});
+      }
+    });
+  }
+
+  handleRemove(e) {
+    this.fileInput.value = null;
+    this.setState({data: undefined, jsoncsv: undefined});
+    console.log("remueve");
   }
 
   render() {
@@ -65,12 +95,12 @@ class App extends Component {
       <div className="App">
         <h1>Vega embed editor</h1>
         <p>{this.state.error}</p>
-        <textarea cols="40" rows="15" onChange={(e) => this.handleChange(e)}>{JSON.stringify(this.state.json, null, 2)}</textarea>
+        <textarea cols="40" rows="15" defaultValue={JSON.stringify(this.state.json, null, 2)} onChange={(e) => this.handleChange(e)}></textarea>
         <div ref={(div) => this.div=div}></div>
         <div className='uploadFiles'>
           <h2>Import csv file</h2>
-          <input type='file' onChange={this.handleUpload.bind(this)}/>
-          <button onClick={(e) => this.handleUpload(e)}>Upload csv</button>
+          <input type='file' ref={input => this.fileInput = input} onChange={e => this.handleUpload(e)}/>
+          <button onClick={e => this.handleRemove(e)}>remove csv</button>
         </div>
       </div>
     );

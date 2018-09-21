@@ -1,9 +1,11 @@
 'use strict';
 require('dotenv').config(); //Set environment variables from private file
 const express = require('express');
+const MongoClient = require('mongodb');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
+const Specs = require('./services/Specs');
 
 //
 //Main entry point. Responsible of setting express app, mongoDB connections 
@@ -21,11 +23,31 @@ app.use(bodyParser.raw({
 }));
 app.use(cors());
 
+const mongoSetup = (callback) => {
+  const port = process.env.MONGODB_PORT || 27017;
+  const url = `mongodb://localhost:${port}`;
+  const username = process.env.MONGODB_USERNAME;
+  const password = process.env.MONGODB_PASSWORD;
+  const uri = `mongodb://${username}:${password}@cluster0-shard-00-00-keqfb.mongodb.net:27017,cluster0-shard-00-01-keqfb.mongodb.net:27017,cluster0-shard-00-02-keqfb.mongodb.net:27017/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true`;
+
+  //Connect to mongo
+  MongoClient.connect(uri, {useNewUrlParser: true}, function (err, client) {
+    if (err) throw err;
+    else console.log('Successfully connected to mongoDB');
+    //Afterwards instruction, client stands for a mongoClient connected to mongoAtlas instance
+    callback(client);
+  });
+};
+
 //Setting up endpoints
-const expressSetup = () => {
+const expressSetup = (mongoClient) => {
+
+  const db = mongoClient.db('app');
+  //mongoimport --db consulta --collection consulta --type json --jsonArray --file file.json
+
   //CRUD Users
-  app.post('/csv', (req, res) => {
-    
+  app.get('/specs', (req, res) => {
+    Specs.getAllSpecs(req, res, db);
   });
 
   //Serving react resources
@@ -46,4 +68,4 @@ const startServer = () => {
   });
 };
 
-expressSetup();
+mongoSetup(expressSetup);
