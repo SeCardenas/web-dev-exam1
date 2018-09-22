@@ -5,16 +5,8 @@ import Papa from 'papaparse';
 
 class VegaVis extends Component {
 
-  constructor(props) {
-    super(props);
-    console.log(this.props.csv);
-    this.state = {
-      error: ''
-    };
-  }
-
   componentDidMount() {
-    const embed_opt = {'mode': 'vega-lite'};
+    const embed_opt = {'mode': 'vega-lite', 'width': 200};
     if(this.props.data !== null) {
       vegaEmbed(this.div, this.props.json, embed_opt)
         .then((res) =>  {
@@ -22,7 +14,7 @@ class VegaVis extends Component {
         })
         .catch(error => {
           console.log(error);
-          if(this.state.error === '') this.setState({error: 'Unable to read spec with the csv file provided'});
+          if(this.props.error === '') this.props.changeError('Unable to read spec with the csv file provided');
         });
         
     }
@@ -32,60 +24,63 @@ class VegaVis extends Component {
           if(res) res.view.run();
         })
         .then(() => {
-          if(this.state.error !== '') this.setState({error: ''});
+          if(this.props.error !== '') this.props.changeError('');
         })
         .catch(error => {
           console.log(error);
-          if(this.state.error === '') this.setState({error: 'Unable to read spec'});
+          if(this.props.error === '') this.props.changeError('Unable to read spec');
         });
     }
   }
 
   componentDidUpdate() {
     const embed_opt = {'mode': 'vega-lite'};
-    if(this.props.data !== null) {
-      vegaEmbed(this.div, this.props.json, embed_opt)
-        .then((res) =>  {
-          if(res) res.view.insert(this.props.json.data.name, this.props.data).run();
-        })
-        .catch(error => {
-          console.log(error);
-          if(this.state.error === '') this.setState({error: 'Unable to read spec with the csv file provided'});
-        });
-        
-    }
-    else {
-      vegaEmbed(this.div, this.props.json, embed_opt)
-        .then((res) =>  {
-          if(res) res.view.run();
-        })
-        .then(() => {
-          if(this.state.error !== '') this.setState({error: ''});
-        })
-        .catch(error => {
-          console.log(error);
-          if(this.state.error === '') this.setState({error: 'Unable to read spec'});
-        });
+    if(this.props.error !== 'Error in json syntax') {
+      if(this.props.data !== null) {
+        vegaEmbed(this.div, this.props.json, embed_opt)
+          .then((res) =>  {
+            if(res) res.view.insert(this.props.json.data.name, this.props.data).run();
+          })
+          .catch(error => {
+            console.log(error);
+            if(this.props.error === '') this.props.changeError('Unable to read spec with the csv file provided');
+          });
+          
+      }
+      else {
+        vegaEmbed(this.div, this.props.json, embed_opt)
+          .then((res) =>  {
+            if(res) res.view.run();
+          })
+          .then(() => {
+            if(this.props.error !== '') this.props.changeError('');
+          })
+          .catch(error => {
+            console.log(error);
+            if(this.props.error === '') this.props.changeError('Unable to read spec');
+          });
+      }
     }
   }
 
   handleChange(e) {
     try {
       const json = JSON.parse(e.target.value);
-      this.setState({error: ''});
+      if(this.props.error !== '') this.props.changeError('');
       this.props.onChange(json);
     }
     catch(err) {
-      this.setState({error: 'Error in json syntax'});
+      this.props.changeError('Error in json syntax');
     }
   }
 
   handleUpload(e) {
     const file = e.target.files[0];
+    console.log('file:', file);
     Papa.parse(file, {
       header: true,
       complete: (results, file) => {
-        this.props.onUpload(results.data, file);
+        this.props.onUpload(results.data);
       }
     });
   }
@@ -102,7 +97,7 @@ class VegaVis extends Component {
         <div className=''>
           <div>
             <textarea cols='40' rows='15' defaultValue={JSON.stringify(this.props.json, null, 2)} onChange={(e) => this.handleChange(e)}></textarea>
-            <p>{this.state.error}</p>
+            <p>{this.props.error}</p>
           </div>
           <div>
             <div ref={(div) => this.div=div}></div>
@@ -123,8 +118,9 @@ VegaVis.propTypes = {
   onChange: PropTypes.func,
   onUpload: PropTypes.func,
   onRemove: PropTypes.func,
+  changeError: PropTypes.func,
   data: PropTypes.array,
-  csv: PropTypes.object
+  error: PropTypes.string
 };
 
 export default VegaVis;

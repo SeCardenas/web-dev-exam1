@@ -11,9 +11,16 @@ Specs.getAllSpecs = (req, res, db) => {
 };
 
 Specs.addSpec = (req, res, db) => {
-  db.collection('specs').insertOne({'json': req.body.json, 'csv': req.body.csv, 'ratings': []}, (err, r) => {
-    if(err) res.status(500).send(err);
-    else res.send(r).ops[0];
+  db.collection('specs').insertOne({
+    'json': req.body.json, 
+    'data': req.body.data, 
+    'ratings': [], 
+    'title': req.body.title, 
+    'user': req.body.user,
+    'timestamp': Date.now()
+  }, (err, r) => {
+    if(err) {res.status(500).send(err); console.log(err);}
+    else res.send(r.ops[0]);
   });
 };
 
@@ -26,7 +33,8 @@ Specs.findSpec = (req, res, db) => {
 };
 
 Specs.addRating = (req, res, db) => {
-  db.collection('spec').findOneAndUpdate({'_id': req.body._id}, {$push: {ratings: {
+  console.log('id:', req.body._id);
+  db.collection('specs').findOneAndUpdate({'_id': new ObjectID(req.body._id)}, {$push: {ratings: {
     'user': req.body.user,
     'rating': req.body.rating
   }}}, {returnOriginal: false}, (err, r) => {
