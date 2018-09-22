@@ -6,13 +6,33 @@ const Specs = {};
 Specs.getAllSpecs = (req, res, db) => {
   db.collection('specs').find({}).toArray( (err, r) => {
     if(err) res.status(500).send(err);
-    else res.send(r);
+    else res.send(r.slice(0,20));
   });
 };
 
 Specs.addSpec = (req, res, db) => {
-  db.collection('specs').insertOne({spec: req.body.spec}, (err, r) => {
-    if(err) res.send(err);
+  db.collection('specs').insertOne({'json': req.body.json, 'csv': req.body.csv, 'ratings': []}, (err, r) => {
+    if(err) res.status(500).send(err);
+    else res.send(r).ops[0];
+  });
+};
+
+Specs.findSpec = (req, res, db) => {
+  db.collection('specs').findOne({'json': req.body.json}, (err, r) => {
+    if(err) res.status(500).send(err);
+    else if(r) res.send(r);
+    else res.status(404).send('Spec not found');
+  });
+};
+
+Specs.addRating = (req, res, db) => {
+  db.collection('spec').findOneAndUpdate({'_id': req.body._id}, {$push: {ratings: {
+    'user': req.body.user,
+    'rating': req.body.rating
+  }}}, {returnOriginal: false}, (err, r) => {
+    if(err) res.status(500).send(err);
+    else if(r.value) res.send(r.value);
+    else res.status(404).send('Spec not found');
   });
 };
 

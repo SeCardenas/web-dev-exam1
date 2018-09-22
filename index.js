@@ -45,9 +45,17 @@ const expressSetup = (mongoClient) => {
   const db = mongoClient.db('app');
   //mongoimport --db consulta --collection consulta --type json --jsonArray --file file.json
 
-  //CRUD Users
+  //CRUD Specs
   app.get('/specs', (req, res) => {
     Specs.getAllSpecs(req, res, db);
+  });
+
+  app.post('/specs', (req, res) => {
+    Specs.addSpec(req, res, db);
+  });
+
+  app.post('/specs/ratings', (req, res) => {
+    Specs.addRating(req, res, db);
   });
 
   //Serving react resources
