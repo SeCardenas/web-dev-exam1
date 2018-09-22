@@ -1,4 +1,6 @@
 .App {
-  text-align: center;
+  text-align: left;
   padding-top: 32px;
+  display: flex;
+  justify-content: space-evenly;
 }

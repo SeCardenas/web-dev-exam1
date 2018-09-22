@@ -6,7 +6,10 @@ const Specs = {};
 Specs.getAllSpecs = (req, res, db) => {
   db.collection('specs').find({}).toArray( (err, r) => {
     if(err) res.status(500).send(err);
-    else res.send(r.slice(0,20));
+    else {
+      const min = r.length-20;
+      res.send(r.slice(Math.max(0, min)).reverse());
+    }
   });
 };
 

@@ -1,0 +1,8 @@
+.rateSpec {
+  display: flex;
+  flex-direction: column;
+  padding-left: 1rem;
+  margin: 1rem;
+  justify-content: center;
+  align-items: flex-start;
+}

@@ -3,6 +3,7 @@ import VegaVis from './components/VegaVis';
 import './App.css';
 import Upload from './components/Upload';
 import Rating from './components/Rating';
+import SpecsList from './components/SpecsList';
 
 class App extends Component {
 
@@ -26,6 +27,8 @@ class App extends Component {
         }
       },
       data: null,
+      ratings: null,
+      updateJson: false,
       specError: '',
       _id: null,
       lastSpecs: []
@@ -33,7 +36,7 @@ class App extends Component {
   }
 
   onChange(json) {
-    this.setState({json: json, _id: null});
+    this.setState({json: json, _id: null, ratings: null});
   }
 
   onUpload(data) {
@@ -62,10 +65,11 @@ class App extends Component {
       })
     }).then(response => response.json())
       .then(json => {
-        this.setState({_id: json._id});
+        alert('visualization saved sucessfully.');
+        this.setState({_id: json._id, ratings: json.ratings});
+        this.updateLastSpecs();
       })
       .catch(err => console.log(err));
-    //alert('visualization saved sucessfully.');
   }
 
   onSubmitRating(user, rating) {
@@ -81,38 +85,67 @@ class App extends Component {
       })
     }).then(response => response.json())
       .then(json => {
-        console.log('json:', json);
+        this.setState({ratings: json.ratings});
+        this.updateLastSpecs();
       })
       .catch(err => console.log(err));
+  }
+
+  onClick(_id, json, data, ratings) {
+    this.setState({
+      _id: _id,
+      json: json,
+      data: data,
+      ratings: ratings,
+      updateJson: true
+    });
   }
 
   updateLastSpecs() {
     fetch('/specs')
       .then(response => response.json())
-      .then(json => console.log(json));
+      .then(json => this.setState({lastSpecs: json}));
   }
 
   componentDidMount() {
     this.updateLastSpecs();
   }
 
+  componentDidUpdate() {
+    if(this.state.updateJson) this.setState({updateJson: false});
+  }
+
+  promRatings() {
+    if(this.state.ratings === null || this.state.ratings === undefined) return null;
+    let sum = 0.0;
+    for(let i = 0; i<this.state.ratings.length; i++) {
+      sum += this.state.ratings[i].rating;
+    }
+    return sum/Math.max(1.0, this.state.ratings.length);
+  }
+
   render() {
     return (
       <div className='App'>
-        <VegaVis onChange={j => this.onChange(j)}
-          onUpload={(d, f) => this.onUpload(d, f)}
-          onRemove={() => this.onRemove()}
-          json={this.state.json}
-          data={this.state.data}
-          error={this.state.specError}
-          changeError={err => this.setState({specError: err})}
-        />
-        {this.state._id === null ?
-          <Upload valid={this.state.specError === ''}
-            onSubmit={(user, title) => this.onSubmitUpdate(user, title)}
-          /> :
-          <Rating onSubmit={(user, rating) => this.onSubmitRating(user, rating)}/>
-        }
+        <div className='principal-container'>
+          <VegaVis onChange={j => this.onChange(j)}
+            onUpload={(d, f) => this.onUpload(d, f)}
+            onRemove={() => this.onRemove()}
+            json={this.state.json}
+            data={this.state.data}
+            error={this.state.specError}
+            rating={this.promRatings()}
+            updateJson={this.state.updateJson}
+            changeError={err => this.setState({specError: err, _id: null, ratings: null})}
+          />
+          {this.state._id === null ?
+            <Upload valid={this.state.specError === ''}
+              onSubmit={(user, title) => this.onSubmitUpdate(user, title)}
+            /> :
+            <Rating onSubmit={(user, rating) => this.onSubmitRating(user, rating)}/>
+          }
+        </div>
+        <SpecsList history={this.state.lastSpecs} onClick={this.onClick.bind(this)}/>
       </div>
     );
   }

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import './css/Upload.css';
 
 class Upload extends Component {
 
@@ -31,9 +32,9 @@ class Upload extends Component {
       <div className='uploadSpec'>
         <h2>Save visualization</h2>
         <label>User name:</label>
-        <input type='text' onChange={e => this.setState({user: e.target.value})} value={this.state.user}/>
+        <input type='text' size='40' onChange={e => this.setState({user: e.target.value})} value={this.state.user}/>
         <label>Visualization title:</label>
-        <input type='text' onChange={e => this.setState({title: e.target.value})} value={this.state.title}/>
+        <input type='text' size='40' onChange={e => this.setState({title: e.target.value})} value={this.state.title}/>
         <button disabled={this.isDisabled()} onClick={() => this.handleClick()}>save</button>
         <span className='submitMsg'>{this.state.error}</span>
       </div>
